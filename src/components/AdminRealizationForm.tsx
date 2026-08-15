@@ -4,6 +4,8 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { addRealization } from "@/actions/realizations";
 
+const CLIENT_TIMEOUT_MS = 90_000;
+
 export function AdminRealizationForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
@@ -16,18 +18,39 @@ export function AdminRealizationForm() {
 
     const form = e.currentTarget;
     const formData = new FormData(form);
-    const result = await addRealization(formData);
 
-    if (!result.success) {
+    try {
+      const result = await Promise.race([
+        addRealization(formData),
+        new Promise<never>((_, reject) => {
+          setTimeout(() => {
+            reject(
+              new Error(
+                "Przekroczono czas oczekiwania (90 s). Najczęściej zdjęcia są za duże albo GitHub nie odpowiada. Spróbuj 1–2 zdjęcia JPG poniżej 2,5 MB.",
+              ),
+            );
+          }, CLIENT_TIMEOUT_MS);
+        }),
+      ]);
+
+      if (!result.success) {
+        setStatus("error");
+        setMessage(result.error);
+        return;
+      }
+
+      setStatus("success");
+      setMessage(result.message);
+      setSlug(result.slug);
+      form.reset();
+    } catch (error) {
       setStatus("error");
-      setMessage(result.error);
-      return;
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Nie udało się dodać realizacji. Odśwież stronę i spróbuj ponownie.",
+      );
     }
-
-    setStatus("success");
-    setMessage(result.message);
-    setSlug(result.slug);
-    form.reset();
   };
 
   return (
@@ -41,8 +64,16 @@ export function AdminRealizationForm() {
               href={`/realizacje/${slug}`}
               className="inline-flex min-h-[48px] items-center border border-oak/40 px-6 text-sm uppercase tracking-[0.15em] text-cream transition-colors hover:border-oak hover:text-oak"
             >
-              Podgląd lokalny
+              Podgląd
             </Link>
+            <a
+              href="https://stoly.rzeszow.pl/realizacje"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-[48px] items-center border border-oak/40 px-6 text-sm uppercase tracking-[0.15em] text-cream transition-colors hover:border-oak hover:text-oak"
+            >
+              Sprawdź na stronie
+            </a>
             <button
               type="button"
               onClick={() => {
@@ -58,6 +89,11 @@ export function AdminRealizationForm() {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-5" encType="multipart/form-data">
+          <p className="text-sm text-muted">
+            Wskazówka: najlepiej 1–3 zdjęcia JPG do 2,5 MB. Format .jfif też jest OK. Nie zamykaj
+            karty podczas „Dodawanie...”.
+          </p>
+
           <div>
             <label
               htmlFor="admin-title"
@@ -113,13 +149,13 @@ export function AdminRealizationForm() {
               htmlFor="admin-images"
               className="mb-2 block text-xs uppercase tracking-[0.15em] text-muted"
             >
-              Zdjęcia * (JPG/PNG/WEBP, max 8 szt., do 5 MB)
+              Zdjęcia * (JPG/JFIF/PNG/WEBP, max 8 szt., do 2,5 MB)
             </label>
             <input
               id="admin-images"
               name="images"
               type="file"
-              accept="image/jpeg,image/png,image/webp"
+              accept="image/jpeg,image/jpg,image/png,image/webp,.jfif,.jpeg,.jpg"
               multiple
               required
               className="w-full cursor-pointer border border-white/10 bg-charcoal px-4 py-3 text-sm text-cream file:mr-4 file:border-0 file:bg-oak/20 file:px-3 file:py-1.5 file:text-oak"
@@ -146,6 +182,12 @@ export function AdminRealizationForm() {
           {status === "error" && (
             <p className="text-sm text-red-400" role="alert">
               {message}
+            </p>
+          )}
+
+          {status === "loading" && (
+            <p className="text-sm text-oak">
+              Trwa wysyłanie... To zwykle 10–60 sekund. Nie zamykaj tej strony.
             </p>
           )}
 

@@ -23,24 +23,39 @@ async function githubFetch(path: string, init?: RequestInit) {
     throw new Error("Brak GITHUB_TOKEN w zmiennych środowiskowych.");
   }
 
-  const response = await fetch(`https://api.github.com${path}`, {
-    ...init,
-    headers: {
-      Accept: "application/vnd.github+json",
-      Authorization: `Bearer ${config.token}`,
-      "X-GitHub-Api-Version": "2022-11-28",
-      "Content-Type": "application/json",
-      ...(init?.headers ?? {}),
-    },
-    cache: "no-store",
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 25000);
 
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`GitHub API ${response.status}: ${body.slice(0, 300)}`);
+  try {
+    const response = await fetch(`https://api.github.com${path}`, {
+      ...init,
+      signal: controller.signal,
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${config.token}`,
+        "X-GitHub-Api-Version": "2022-11-28",
+        "Content-Type": "application/json",
+        ...(init?.headers ?? {}),
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(`GitHub API ${response.status}: ${body.slice(0, 300)}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error(
+        "Przekroczono czas połączenia z GitHubem. Spróbuj z mniejszymi zdjęciami (do 2 MB).",
+      );
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
   }
-
-  return response.json();
 }
 
 export function isGithubPublishConfigured() {
@@ -69,31 +84,31 @@ export async function publishFilesToGithub({
   );
   const baseTreeSha = latestCommit.tree.sha as string;
 
-  const treeItems = [];
+  const treeItems = await Promise.all(
+    files.map(async (file) => {
+      const encoding = file.encoding ?? (Buffer.isBuffer(file.content) ? "base64" : "utf-8");
+      const content =
+        encoding === "base64"
+          ? Buffer.isBuffer(file.content)
+            ? file.content.toString("base64")
+            : file.content
+          : typeof file.content === "string"
+            ? file.content
+            : file.content.toString("utf-8");
 
-  for (const file of files) {
-    const encoding = file.encoding ?? (Buffer.isBuffer(file.content) ? "base64" : "utf-8");
-    const content =
-      encoding === "base64"
-        ? Buffer.isBuffer(file.content)
-          ? file.content.toString("base64")
-          : file.content
-        : typeof file.content === "string"
-          ? file.content
-          : file.content.toString("utf-8");
+      const blob = await githubFetch(`/repos/${owner}/${repo}/git/blobs`, {
+        method: "POST",
+        body: JSON.stringify({ content, encoding }),
+      });
 
-    const blob = await githubFetch(`/repos/${owner}/${repo}/git/blobs`, {
-      method: "POST",
-      body: JSON.stringify({ content, encoding }),
-    });
-
-    treeItems.push({
-      path: file.path,
-      mode: "100644",
-      type: "blob",
-      sha: blob.sha as string,
-    });
-  }
+      return {
+        path: file.path,
+        mode: "100644" as const,
+        type: "blob" as const,
+        sha: blob.sha as string,
+      };
+    }),
+  );
 
   const tree = await githubFetch(`/repos/${owner}/${repo}/git/trees`, {
     method: "POST",

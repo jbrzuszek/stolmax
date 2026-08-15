@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   },
 };
 
+// Vercel: dłuższy czas na upload zdjęć + commit do GitHuba
+export const maxDuration = 60;
+
 export default function AdminPage() {
   return (
     <div className="pt-16 md:pt-20">
@@ -19,8 +22,8 @@ export default function AdminPage() {
             Dodaj realizację
           </h1>
           <p className="mt-4 max-w-2xl text-cream/60">
-            Formularz lokalny / administracyjny. Po kliknięciu „Dodaj realizację” wpis trafia do
-            GitHuba, a Vercel w ciągu kilku minut publikuje go na stoly.rzeszow.pl.
+            Po kliknięciu „Dodaj realizację” wpis trafia na GitHub, a Vercel publikuje go na
+            stoly.rzeszow.pl w ciągu kilku minut.
           </p>
 
           <div className="mt-10">

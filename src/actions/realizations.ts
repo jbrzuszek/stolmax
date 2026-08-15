@@ -7,7 +7,7 @@ import { publishFilesToGithub, isGithubPublishConfigured } from "@/lib/github-pu
 import { uniqueRealizationSlug, type Realization } from "@/lib/realizations";
 
 const MAX_IMAGES = 8;
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 2.5 * 1024 * 1024;
 const DATA_PATH = path.join(process.cwd(), "src", "data", "realizations.json");
 
 const metaSchema = z.object({
@@ -22,10 +22,37 @@ export type AddRealizationResult =
   | { success: false; error: string };
 
 function extensionFromMime(mime: string) {
-  if (mime === "image/png") return "png";
-  if (mime === "image/webp") return "webp";
-  if (mime === "image/jpeg" || mime === "image/jpg") return "jpg";
+  const normalized = mime.toLowerCase().trim();
+  if (normalized === "image/png") return "png";
+  if (normalized === "image/webp") return "webp";
+  if (
+    normalized === "image/jpeg" ||
+    normalized === "image/jpg" ||
+    normalized === "image/pjpeg" ||
+    normalized === "image/jfif"
+  ) {
+    return "jpg";
+  }
   return null;
+}
+
+function extensionFromFileName(name: string) {
+  const lower = name.toLowerCase();
+  if (lower.endsWith(".png")) return "png";
+  if (lower.endsWith(".webp")) return "webp";
+  if (
+    lower.endsWith(".jpg") ||
+    lower.endsWith(".jpeg") ||
+    lower.endsWith(".jfif") ||
+    lower.endsWith(".jpe")
+  ) {
+    return "jpg";
+  }
+  return null;
+}
+
+function resolveImageExtension(file: File) {
+  return extensionFromMime(file.type) ?? extensionFromFileName(file.name);
 }
 
 async function readRealizationsFromDisk(): Promise<Realization[]> {
@@ -141,15 +168,15 @@ export async function addRealization(formData: FormData): Promise<AddRealization
       if (file.size > MAX_IMAGE_BYTES) {
         return {
           success: false,
-          error: `Zdjęcie „${file.name}” jest za duże (max 5 MB).`,
+          error: `Zdjęcie „${file.name}” jest za duże (max 2,5 MB). Zmniejsz je lub zapisz jako JPG.`,
         };
       }
 
-      const ext = extensionFromMime(file.type);
+      const ext = resolveImageExtension(file);
       if (!ext) {
         return {
           success: false,
-          error: `Nieobsługiwany format pliku „${file.name}”. Dozwolone: JPG, PNG, WEBP.`,
+          error: `Nieobsługiwany format pliku „${file.name}”. Dozwolone: JPG, JPEG, JFIF, PNG, WEBP.`,
         };
       }
 
