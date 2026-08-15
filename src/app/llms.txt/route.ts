@@ -18,6 +18,7 @@ ${siteConfig.description}
 
 - [Strona główna](${absoluteUrl("/")}): ${siteConfig.tagline}
 - [Oferta](${absoluteUrl("/oferta")}): katalog stołów loftowych na wymiar
+- [Realizacje](${absoluteUrl("/realizacje")}): przykładowe wykonane stoły loftowe
 - [Poproś o wycenę](${absoluteUrl("/wycena")}): formularz wyceny z wyborem modelu
 - [Kontakt](${absoluteUrl("/kontakt")}): formularz kontaktowy i dane firmy
 

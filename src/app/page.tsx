@@ -3,7 +3,9 @@ import { AboutSection } from "@/components/AboutSection";
 import { FeaturedProducts } from "@/components/FeaturedProducts";
 import { Hero } from "@/components/Hero";
 import { JsonLd } from "@/components/JsonLd";
+import { RealizationsSection } from "@/components/RealizationsSection";
 import { getFeaturedProducts } from "@/lib/products";
+import { getLatestRealizations } from "@/lib/realizations";
 import { buildPageMetadata, buildWebPageSchema } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -16,6 +18,7 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default function HomePage() {
   const featured = getFeaturedProducts();
+  const latestRealizations = getLatestRealizations(3);
 
   return (
     <>
@@ -28,6 +31,7 @@ export default function HomePage() {
       <Hero />
       <AboutSection />
       <FeaturedProducts products={featured} />
+      <RealizationsSection realizations={latestRealizations} />
     </>
   );
 }

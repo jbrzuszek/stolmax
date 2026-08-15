@@ -37,6 +37,7 @@ export const siteConfig = {
   nav: [
     { label: "Home", href: "/" },
     { label: "Oferta", href: "/oferta" },
+    { label: "Realizacje", href: "/realizacje" },
     { label: "Poproś o wycenę", href: "/wycena" },
     { label: "Kontakt", href: "/kontakt" },
   ],
