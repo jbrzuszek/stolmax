@@ -140,7 +140,7 @@ export function ContactForm() {
       <button
         type="submit"
         disabled={status === "loading"}
-        className="wood-gradient inline-flex min-h-[52px] w-full items-center justify-center px-8 text-sm font-medium uppercase tracking-[0.15em] text-charcoal transition-opacity disabled:opacity-60 sm:w-auto"
+        className="wood-gradient inline-flex min-h-[52px] w-full cursor-pointer items-center justify-center px-8 text-sm font-medium uppercase tracking-[0.15em] text-charcoal transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 sm:w-auto"
       >
         {status === "loading" ? "Wysyłanie..." : "Wyślij wiadomość"}
       </button>
