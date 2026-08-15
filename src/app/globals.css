@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@source "../components/**/*.{js,ts,jsx,tsx}";
+@source "./**/*.{js,ts,jsx,tsx}";
+
+@theme {
+  --color-charcoal: #0a0a0a;
+  --color-anthracite: #1c1c1e;
+  --color-graphite: #2a2a2e;
+  --color-oak: #b8956a;
+  --color-walnut: #8b5a2b;
+  --color-cream: #f5f0e8;
+  --color-muted: #9a9a9a;
+
+  --font-display: var(--font-cormorant);
+  --font-body: var(--font-dm-sans);
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  background-color: var(--color-charcoal);
+  color: var(--color-cream);
+  font-family: var(--font-body), system-ui, sans-serif;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #4a4a4f transparent;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #4a4a4f transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #4a4a4f;
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #6b6b70;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+::selection {
+  background-color: color-mix(in srgb, var(--color-oak) 40%, transparent);
+  color: var(--color-cream);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .section-padding {
+    @apply px-5 py-20 md:px-10 lg:px-16 lg:py-28;
+  }
+
+  .container-narrow {
+    @apply mx-auto w-full max-w-7xl;
+  }
+
+  .wood-gradient {
+    background: linear-gradient(
+      135deg,
+      var(--color-walnut) 0%,
+      var(--color-oak) 50%,
+      var(--color-walnut) 100%
+    );
+  }
+}
