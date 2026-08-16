@@ -17,9 +17,74 @@ const metaSchema = z.object({
   adminPassword: z.string().min(1, "Podaj hasło administratora."),
 });
 
-export type AddRealizationResult =
+export type RealizationActionResult =
   | { success: true; slug: string; published: boolean; message: string }
   | { success: false; error: string };
+
+/** @deprecated use RealizationActionResult */
+export type AddRealizationResult = RealizationActionResult;
+
+async function prepareUploadedImages(
+  uploads: File[],
+): Promise<{ images: Array<{ filename: string; buffer: Buffer }> } | { error: string }> {
+  if (uploads.length > MAX_IMAGES) {
+    return { error: `Możesz dodać maksymalnie ${MAX_IMAGES} zdjęć.` };
+  }
+
+  const preparedImages: Array<{ filename: string; buffer: Buffer }> = [];
+
+  for (const [index, file] of uploads.entries()) {
+    if (file.size > MAX_IMAGE_BYTES) {
+      return {
+        error: `Zdjęcie „${file.name}” jest za duże (max 2,5 MB). Zmniejsz je lub zapisz jako JPG.`,
+      };
+    }
+
+    const ext = resolveImageExtension(file);
+    if (!ext) {
+      return {
+        error: `Nieobsługiwany format pliku „${file.name}”. Dozwolone: JPG, JPEG, JFIF, PNG, WEBP.`,
+      };
+    }
+
+    preparedImages.push({
+      filename: `img${index + 1}.${ext}`,
+      buffer: Buffer.from(await file.arrayBuffer()),
+    });
+  }
+
+  return { images: preparedImages };
+}
+
+function verifyAdmin(formData: FormData) {
+  const adminSecret = process.env.ADMIN_SECRET;
+  if (!adminSecret) {
+    return {
+      ok: false as const,
+      error: "Brak ADMIN_SECRET w zmiennych środowiskowych. Ustaw hasło administratora.",
+    };
+  }
+
+  const parsed = metaSchema.safeParse({
+    title: formData.get("title"),
+    description: formData.get("description"),
+    location: formData.get("location") || undefined,
+    adminPassword: formData.get("adminPassword"),
+  });
+
+  if (!parsed.success) {
+    return {
+      ok: false as const,
+      error: parsed.error.issues[0]?.message ?? "Nieprawidłowe dane formularza.",
+    };
+  }
+
+  if (parsed.data.adminPassword !== adminSecret) {
+    return { ok: false as const, error: "Nieprawidłowe hasło administratora." };
+  }
+
+  return { ok: true as const, data: parsed.data };
+}
 
 function extensionFromMime(mime: string) {
   const normalized = mime.toLowerCase().trim();
@@ -123,33 +188,15 @@ async function writeLocalFiles(
   await fs.writeFile(DATA_PATH, `${JSON.stringify(nextList, null, 2)}\n`, "utf-8");
 }
 
-export async function addRealization(formData: FormData): Promise<AddRealizationResult> {
+export async function listAdminRealizations(): Promise<Realization[]> {
+  const list = await readExistingRealizations();
+  return [...list].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+export async function addRealization(formData: FormData): Promise<RealizationActionResult> {
   try {
-    const adminSecret = process.env.ADMIN_SECRET;
-    if (!adminSecret) {
-      return {
-        success: false,
-        error: "Brak ADMIN_SECRET w .env.local. Ustaw hasło administratora.",
-      };
-    }
-
-    const parsed = metaSchema.safeParse({
-      title: formData.get("title"),
-      description: formData.get("description"),
-      location: formData.get("location") || undefined,
-      adminPassword: formData.get("adminPassword"),
-    });
-
-    if (!parsed.success) {
-      return {
-        success: false,
-        error: parsed.error.issues[0]?.message ?? "Nieprawidłowe dane formularza.",
-      };
-    }
-
-    if (parsed.data.adminPassword !== adminSecret) {
-      return { success: false, error: "Nieprawidłowe hasło administratora." };
-    }
+    const auth = verifyAdmin(formData);
+    if (!auth.ok) return { success: false, error: auth.error };
 
     const uploads = formData.getAll("images").filter((item): item is File => item instanceof File);
     const validUploads = uploads.filter((file) => file.size > 0);
@@ -158,46 +205,21 @@ export async function addRealization(formData: FormData): Promise<AddRealization
       return { success: false, error: "Dodaj co najmniej jedno zdjęcie." };
     }
 
-    if (validUploads.length > MAX_IMAGES) {
-      return { success: false, error: `Możesz dodać maksymalnie ${MAX_IMAGES} zdjęć.` };
-    }
-
-    const preparedImages: Array<{ filename: string; buffer: Buffer }> = [];
-
-    for (const [index, file] of validUploads.entries()) {
-      if (file.size > MAX_IMAGE_BYTES) {
-        return {
-          success: false,
-          error: `Zdjęcie „${file.name}” jest za duże (max 2,5 MB). Zmniejsz je lub zapisz jako JPG.`,
-        };
-      }
-
-      const ext = resolveImageExtension(file);
-      if (!ext) {
-        return {
-          success: false,
-          error: `Nieobsługiwany format pliku „${file.name}”. Dozwolone: JPG, JPEG, JFIF, PNG, WEBP.`,
-        };
-      }
-
-      preparedImages.push({
-        filename: `img${index + 1}.${ext}`,
-        buffer: Buffer.from(await file.arrayBuffer()),
-      });
-    }
+    const prepared = await prepareUploadedImages(validUploads);
+    if ("error" in prepared) return { success: false, error: prepared.error };
 
     const existing = await readExistingRealizations();
     const slug = uniqueRealizationSlug(
-      parsed.data.title,
+      auth.data.title,
       existing.map((item) => item.slug),
     );
 
     const realization: Realization = {
       slug,
-      title: parsed.data.title,
-      description: parsed.data.description,
-      location: parsed.data.location || undefined,
-      images: preparedImages.map((image) => `/realizacje/${slug}/${image.filename}`),
+      title: auth.data.title,
+      description: auth.data.description,
+      location: auth.data.location || undefined,
+      images: prepared.images.map((image) => `/realizacje/${slug}/${image.filename}`),
       createdAt: new Date().toISOString().slice(0, 10),
     };
 
@@ -206,7 +228,7 @@ export async function addRealization(formData: FormData): Promise<AddRealization
     );
 
     try {
-      await writeLocalFiles(realization, preparedImages, nextList);
+      await writeLocalFiles(realization, prepared.images, nextList);
     } catch (error) {
       console.warn("Local write skipped/failed:", error);
     }
@@ -216,6 +238,103 @@ export async function addRealization(formData: FormData): Promise<AddRealization
     if (isGithubPublishConfigured()) {
       await publishFilesToGithub({
         message: `Dodaj realizację: ${realization.title}`,
+        files: [
+          {
+            path: "src/data/realizations.json",
+            content: `${JSON.stringify(nextList, null, 2)}\n`,
+            encoding: "utf-8",
+          },
+          ...prepared.images.map((image) => ({
+            path: `public/realizacje/${slug}/${image.filename}`,
+            content: image.buffer,
+            encoding: "base64" as const,
+          })),
+        ],
+      });
+      published = true;
+    }
+
+    if (!published) {
+      return {
+        success: true,
+        slug,
+        published: false,
+        message:
+          "Realizacja zapisana lokalnie. Aby pojawiła się na stoly.rzeszow.pl, ustaw GITHUB_TOKEN.",
+      };
+    }
+
+    return {
+      success: true,
+      slug,
+      published: true,
+      message:
+        "Realizacja została wysłana na GitHub. Za 1–3 minuty powinna być widoczna na stoly.rzeszow.pl.",
+    };
+  } catch (error) {
+    console.error("addRealization error:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Nie udało się dodać realizacji.",
+    };
+  }
+}
+
+export async function updateRealization(formData: FormData): Promise<RealizationActionResult> {
+  try {
+    const auth = verifyAdmin(formData);
+    if (!auth.ok) return { success: false, error: auth.error };
+
+    const slug = String(formData.get("slug") ?? "").trim();
+    if (!slug) {
+      return { success: false, error: "Wybierz realizację do edycji." };
+    }
+
+    const existing = await readExistingRealizations();
+    const current = existing.find((item) => item.slug === slug);
+
+    if (!current) {
+      return { success: false, error: "Nie znaleziono wybranej realizacji." };
+    }
+
+    const uploads = formData
+      .getAll("images")
+      .filter((item): item is File => item instanceof File)
+      .filter((file) => file.size > 0);
+
+    let images = current.images;
+    let preparedImages: Array<{ filename: string; buffer: Buffer }> = [];
+
+    if (uploads.length > 0) {
+      const prepared = await prepareUploadedImages(uploads);
+      if ("error" in prepared) return { success: false, error: prepared.error };
+      preparedImages = prepared.images;
+      images = preparedImages.map((image) => `/realizacje/${slug}/${image.filename}`);
+    }
+
+    const updated: Realization = {
+      ...current,
+      title: auth.data.title,
+      description: auth.data.description,
+      location: auth.data.location || undefined,
+      images,
+    };
+
+    const nextList = existing
+      .map((item) => (item.slug === slug ? updated : item))
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+
+    try {
+      await writeLocalFiles(updated, preparedImages, nextList);
+    } catch (error) {
+      console.warn("Local write skipped/failed:", error);
+    }
+
+    let published = false;
+
+    if (isGithubPublishConfigured()) {
+      await publishFilesToGithub({
+        message: `Edytuj realizację: ${updated.title}`,
         files: [
           {
             path: "src/data/realizations.json",
@@ -237,8 +356,7 @@ export async function addRealization(formData: FormData): Promise<AddRealization
         success: true,
         slug,
         published: false,
-        message:
-          "Realizacja zapisana lokalnie. Aby pojawiła się na stoly.rzeszow.pl, ustaw GITHUB_TOKEN w .env.local — wtedy kolejna publikacja pójdzie automatycznie na GitHub/Vercel.",
+        message: "Zmiany zapisane lokalnie. Ustaw GITHUB_TOKEN, aby publikować automatycznie.",
       };
     }
 
@@ -247,13 +365,13 @@ export async function addRealization(formData: FormData): Promise<AddRealization
       slug,
       published: true,
       message:
-        "Realizacja została wysłana na GitHub. Za 1–3 minuty powinna być widoczna na stoly.rzeszow.pl (po wdrożeniu Vercel).",
+        "Zmiany wysłane na GitHub. Za 1–3 minuty powinny być widoczne na stoly.rzeszow.pl.",
     };
   } catch (error) {
-    console.error("addRealization error:", error);
+    console.error("updateRealization error:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Nie udało się dodać realizacji.",
+      error: error instanceof Error ? error.message : "Nie udało się zaktualizować realizacji.",
     };
   }
 }

@@ -3,12 +3,16 @@
 import { useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
 import { sendContactMessage } from "@/actions/contact";
+import { quoteSources } from "@/data/site";
+
+type ReferralSource = (typeof quoteSources)[number]["value"];
 
 interface FormState {
   name: string;
   email: string;
   phone: string;
   message: string;
+  source: "" | ReferralSource;
 }
 
 const initialState: FormState = {
@@ -16,6 +20,7 @@ const initialState: FormState = {
   email: "",
   phone: "",
   message: "",
+  source: "",
 };
 
 export function ContactForm() {
@@ -33,6 +38,7 @@ export function ContactForm() {
       email: form.email,
       phone: form.phone || undefined,
       message: form.message,
+      source: form.source || undefined,
     });
 
     if (!result.success) {
@@ -47,8 +53,8 @@ export function ContactForm() {
 
   const update =
     (field: keyof FormState) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setForm((prev) => ({ ...prev, [field]: e.target.value }));
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+      setForm((prev) => ({ ...prev, [field]: e.target.value as FormState[typeof field] }));
     };
 
   if (status === "success") {
@@ -129,6 +135,28 @@ export function ContactForm() {
           onChange={update("message")}
           className="w-full resize-y border border-white/10 bg-charcoal px-4 py-3 text-cream outline-none transition-colors focus:border-oak/50"
         />
+      </div>
+
+      <div>
+        <label
+          htmlFor="contact-source"
+          className="mb-2 block text-xs uppercase tracking-[0.15em] text-muted"
+        >
+          Skąd o nas wiesz?
+        </label>
+        <select
+          id="contact-source"
+          value={form.source}
+          onChange={update("source")}
+          className="w-full appearance-none border border-white/10 bg-charcoal px-4 py-3 text-cream outline-none transition-colors focus:border-oak/50"
+        >
+          <option value="">Wybierz (opcjonalnie)</option>
+          {quoteSources.map((source) => (
+            <option key={source.value} value={source.value}>
+              {source.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       {status === "error" && (

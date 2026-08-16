@@ -47,6 +47,8 @@ export const quoteSources = [
   { value: "strona", label: "Strona internetowa" },
   { value: "instagram", label: "Instagram" },
   { value: "facebook", label: "Facebook" },
+  { value: "ulotka", label: "Ulotka" },
+  { value: "inne", label: "Inne" },
 ] as const;
 
 export const featuredSlugs = ["pajak", "x", "rama_prostokat", "y"] as const;
