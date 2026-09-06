@@ -53,6 +53,29 @@ export const quoteSources = [
 
 export const featuredSlugs = ["pajak", "x", "rama_prostokat", "y"] as const;
 
-export const offerPrioritySlugs = [...featuredSlugs, "krzyz"] as const;
+/** Kolejność stołów metalowych w ofercie (warianty zaraz po bazowych modelach) */
+export const offerPrioritySlugs = [
+  "pajak",
+  "pajak_8_nog",
+  "x",
+  "kolo_x_2d",
+  "rama_prostokat",
+  "rama_bez_poprzeczki",
+  "rama_8x8",
+  "kolo_lamele",
+  "y",
+  "krzyz",
+] as const;
 
-export const metalLegSlugs = [...featuredSlugs, "krzyz"] as const;
+/** Pierwsze wśród stołów z nogami drewnianymi */
+export const woodPrioritySlugs = [
+  "prostokat_l_prosta",
+  "kolo_l_diament",
+  "owal_l_diament",
+] as const;
+
+export const metalLegSlugs = [
+  ...offerPrioritySlugs,
+  "pajak_wykrecany",
+  "stol_v",
+] as const;

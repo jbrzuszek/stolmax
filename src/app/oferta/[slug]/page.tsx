@@ -80,7 +80,12 @@ export default async function ProductPage({ params }: PageProps) {
 
           <div className="grid min-w-0 gap-12 lg:grid-cols-2 lg:gap-16">
             <AnimatedSection className="min-w-0">
-              <ProductGallery images={product.images} title={product.title} />
+              <ProductGallery
+                images={product.images}
+                title={product.title}
+                imageFocus={product.imageFocus}
+                imageFocusByPath={product.imageFocusByPath}
+              />
             </AnimatedSection>
 
             <AnimatedSection delay={0.1} className="min-w-0">

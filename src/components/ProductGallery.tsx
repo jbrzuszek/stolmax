@@ -3,13 +3,22 @@
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { resolveImageFocus } from "@/lib/image-focus";
+import { IMAGE_FOCUS_CLASS, type ImageFocus } from "@/types/product";
 
 interface ProductGalleryProps {
   images: string[];
   title: string;
+  imageFocus?: ImageFocus;
+  imageFocusByPath?: Record<string, ImageFocus>;
 }
 
-export function ProductGallery({ images, title }: ProductGalleryProps) {
+export function ProductGallery({
+  images,
+  title,
+  imageFocus = "center",
+  imageFocusByPath = {},
+}: ProductGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
@@ -40,6 +49,7 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
   if (images.length === 0) return null;
 
   const activeImage = images[activeIndex];
+  const activeFocus = resolveImageFocus(activeImage, imageFocus, imageFocusByPath);
 
   return (
     <>
@@ -56,31 +66,37 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"
             priority
-            className="object-cover"
+            className={`object-cover ${IMAGE_FOCUS_CLASS[activeFocus]}`}
           />
         </button>
 
         {images.length > 1 && (
           <div className="flex w-full min-w-0 max-w-full gap-2 overflow-x-auto overscroll-x-contain pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {images.map((image, index) => (
-              <button
-                key={image}
-                type="button"
-                onClick={() => setActiveIndex(index)}
-                className={`relative h-20 w-20 shrink-0 overflow-hidden border-2 sm:w-24 ${
-                  index === activeIndex ? "border-oak" : "border-transparent opacity-60 hover:opacity-100"
-                }`}
-                aria-label={`Miniatura ${index + 1}`}
-              >
-                <Image
-                  src={image}
-                  alt=""
-                  fill
-                  sizes="96px"
-                  className="object-cover"
-                />
-              </button>
-            ))}
+            {images.map((image, index) => {
+              const thumbFocus = resolveImageFocus(image, imageFocus, imageFocusByPath);
+
+              return (
+                <button
+                  key={image}
+                  type="button"
+                  onClick={() => setActiveIndex(index)}
+                  className={`relative h-20 w-20 shrink-0 overflow-hidden border-2 sm:w-24 ${
+                    index === activeIndex
+                      ? "border-oak"
+                      : "border-transparent opacity-60 hover:opacity-100"
+                  }`}
+                  aria-label={`Miniatura ${index + 1}`}
+                >
+                  <Image
+                    src={image}
+                    alt=""
+                    fill
+                    sizes="96px"
+                    className={`object-cover ${IMAGE_FOCUS_CLASS[thumbFocus]}`}
+                  />
+                </button>
+              );
+            })}
           </div>
         )}
       </div>

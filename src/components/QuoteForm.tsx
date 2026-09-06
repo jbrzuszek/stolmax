@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
 import { sendQuoteRequest } from "@/actions/quote";
 import { quoteSources } from "@/data/site";
+import { IMAGE_FOCUS_CLASS, type ImageFocus } from "@/types/product";
 
 type QuoteSource = (typeof quoteSources)[number]["value"];
 
@@ -12,6 +13,7 @@ export interface QuoteProductOption {
   slug: string;
   title: string;
   cover: string;
+  imageFocus: ImageFocus;
 }
 
 interface FormState {
@@ -170,7 +172,7 @@ export function QuoteForm({ products, initialSlug = "" }: QuoteFormProps) {
                     alt={product.title}
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
-                    className="object-cover"
+                    className={`object-cover ${IMAGE_FOCUS_CLASS[product.imageFocus]}`}
                   />
                   {selected && (
                     <div className="absolute inset-0 bg-charcoal/35" aria-hidden="true" />

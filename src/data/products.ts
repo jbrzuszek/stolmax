@@ -44,7 +44,7 @@ export const productMeta: Record<string, ProductMeta> = {
     specs: ["System ELKA - do 6 wkładek po 50 cm", "8 nóg po rozsunięciu", "Krawędź: 54-72 mm"],
   },
   kolo_l_diament: {
-    title: "Koło ELKA noga diament",
+    title: "Koło ELKA",
     description:
       "Stół koło ELKA możliwość wykonania blatów z laminatu oraz z forniru dębowego, pogrubienie krawędzi stołu 54 mm. Atutem stołów tego typu jest ich uniwersalność - stół o średnicy 120 cm można rozłożyć do dużych rozmiarów z 8 nogami zapewniającymi stabilność.",
     specs: ["Średnica przed rozłożeniem: 120 cm", "Do 4 wkładek po 50 cm", "8 nóg po rozsunięciu"],
@@ -140,6 +140,92 @@ export const productMeta: Record<string, ProductMeta> = {
       "Stół koło Y wykonany w stylu loftowym, możliwość wykonania blatów z laminatu lub forniru dębowego, pogrubienie krawędzi stołu 54 mm. Nogi metalowe, malowane proszkowo. Możliwość wykonania stołu o średnicy 100 cm - nierozkładany lub z 1-2 wkładkami po 50 cm.",
     specs: ["Blat okrągły", "Średnica od 100 cm", "Nogi w kształcie Y"],
     featured: true,
+    legType: "metal",
+  },
+  kolo_lamele: {
+    title: "Stół koło Lamele",
+    description:
+      "Stół koło Lamele wykonany w stylu loftowym - okrągły blat z laminatu lub forniru dębowego zestawiony z charakterystyczną, ażurową bazą z metalowych lameli. Pogrubienie krawędzi stołu 54 mm. Nogi metalowe malowane proszkowo. Elegancki model do salonu i jadalni, możliwy również w wersji rozkładanej.",
+    specs: ["Blat okrągły", "Metalowa baza z lameli", "Blat: laminat lub fornir dębowy", "Krawędź: 54 mm"],
+    legType: "metal",
+  },
+  kolo_x_2d: {
+    title: "Stół koło X 2D",
+    description:
+      "Stół koło X synchroniczny wykonany w stylu loftowym, możliwość wykonania blatów z laminatu lub forniru dębowego, pogrubienie krawędzi stołu 54 mm. Nogi metalowe, malowane proszkowo. Możliwość wykonania stołu o średnicy 100 cm - nierozkładany lub z 1-2 wkładkami po 50 cm.",
+    specs: ["Blat okrągły", "Średnica od 100 cm", "Nogi w kształcie X"],
+    legType: "metal",
+  },
+  kacper_2d_motyl: {
+    title: "Kacper 2D noga motyl",
+    description:
+      "Stół Kacper 2D z nogami typu motyl, rozkładany na metalowych prowadnicach. Blaty wykonane z płyty laminowanej lub forniru dębowego, pogrubienie krawędzi stołu 36 mm. Charakterystyczne drewniane nogi w kształcie motyla nadają stołowi lekkości i oryginalnego charakteru.",
+    specs: [
+      "Nogi drewniane typu motyl",
+      "Rozkładany na metalowych prowadnicach",
+      "Blat: laminat lub fornir dębowy",
+      "Pogrubienie krawędzi: 36 mm",
+    ],
+    legType: "wood",
+  },
+  pajak_8_nog: {
+    title: "Stół Pająk na 8 nogach",
+    description:
+      "Stół Pająk na 8 nogach wykonany w stylu loftowym, możliwość wykonania blatów z laminatu lub forniru dębowego, pogrubienie krawędzi stołu 54 mm. Nogi metalowe malowane proszkowo - konstrukcja na ośmiu podporach zapewnia wyjątkową stabilność, także po rozłożeniu.",
+    specs: [
+      "8 nóg metalowych",
+      "Styl loftowy",
+      "Blat: laminat lub fornir dębowy",
+      "Rozkładany: 1-2 wkładki 50 cm",
+    ],
+    legType: "metal",
+  },
+  pajak_wykrecany: {
+    title: "Stół Pająk Wykręcany",
+    description:
+      "Stół Pająk Wykręcany wykonany w stylu loftowym, możliwość wykonania blatów z laminatu lub forniru dębowego, pogrubienie krawędzi stołu 54 mm. Nogi metalowe malowane proszkowo o charakterystycznej, wykręcanej formie - mocny akcent industrialny w jadalni.",
+    specs: [
+      "Nogi metalowe wykręcane",
+      "Styl loftowy",
+      "Blat: laminat lub fornir dębowy",
+      "Krawędź: 54 mm",
+    ],
+    legType: "metal",
+  },
+  rama_8x8: {
+    title: "Stół Rama 8x8",
+    description:
+      "Stół Rama 8x8 synchroniczny wykonany w stylu loftowym, możliwość wykonania blatów z laminatu lub forniru dębowego, pogrubienie krawędzi stołu 54 mm. Nogi metalowe malowane proszkowo w profilu 8x8 - solidna, geometryczna konstrukcja ramowa.",
+    specs: [
+      "Profil ramy 8x8",
+      "Nogi metalowe malowane proszkowo",
+      "Blat: laminat lub fornir dębowy",
+      "Rozkładany: 1-2 wkładki 50 cm",
+    ],
+    legType: "metal",
+  },
+  rama_bez_poprzeczki: {
+    title: "Stół Rama bez poprzeczki",
+    description:
+      "Stół Rama bez poprzeczki wykonany w stylu loftowym, możliwość wykonania blatów z laminatu lub forniru dębowego, pogrubienie krawędzi stołu 54 mm. Nogi metalowe malowane proszkowo - otwarta konstrukcja ramowa bez dolnej poprzeczki, więcej swobody dla nóg przy stole.",
+    specs: [
+      "Konstrukcja bez poprzeczki",
+      "Nogi metalowe malowane proszkowo",
+      "Blat: laminat lub fornir dębowy",
+      "Krawędź: 54 mm",
+    ],
+    legType: "metal",
+  },
+  stol_v: {
+    title: "Stół V",
+    description:
+      "Stół V wykonany w stylu loftowym, możliwość wykonania blatów z laminatu lub forniru dębowego, pogrubienie krawędzi stołu 54 mm. Nogi metalowe malowane proszkowo w charakterystycznym kształcie litery V - nowoczesna, lekka forma z industrialnym charakterem.",
+    specs: [
+      "Nogi w kształcie V",
+      "Styl loftowy",
+      "Blat: laminat lub fornir dębowy",
+      "Krawędź: 54 mm",
+    ],
     legType: "metal",
   },
 };

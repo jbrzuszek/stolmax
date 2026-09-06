@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import type { Product } from "@/lib/products";
+import { resolveImageFocus } from "@/lib/image-focus";
+import { IMAGE_FOCUS_CLASS, type Product } from "@/types/product";
 
 interface ProductCardProps {
   product: Product;
@@ -12,6 +13,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, priority = false }: ProductCardProps) {
   const cover = product.images[0];
+  const focus = resolveImageFocus(cover, product.imageFocus, product.imageFocusByPath);
 
   return (
     <motion.article
@@ -27,7 +29,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             priority={priority}
-            className="object-cover"
+            className={`object-cover ${IMAGE_FOCUS_CLASS[focus]}`}
           />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-charcoal/80 via-transparent to-transparent opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100" />
         </div>

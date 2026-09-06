@@ -27,6 +27,7 @@ export default async function WycenaPage({ searchParams }: PageProps) {
     slug: product.slug,
     title: product.title,
     cover: product.images[0],
+    imageFocus: product.imageFocus,
   }));
 
   return (
