@@ -9,7 +9,7 @@ export function Hero() {
     <section className="relative flex min-h-[100svh] items-center overflow-hidden pt-16 md:pt-20">
       <div className="absolute inset-0">
         <Image
-          src="/oferta/pajak/img1.jpg"
+          src="/hero/pajak.jpg"
           alt="Stół Pająk - stoły loftowe na wymiar Stolmax Rzeszów"
           fill
           priority

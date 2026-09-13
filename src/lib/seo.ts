@@ -8,7 +8,7 @@ export const SEO_IDS = {
   website: `${siteConfig.url}/#website`,
 } as const;
 
-export const DEFAULT_OG_IMAGE = "/oferta/pajak/img1.jpg";
+export const DEFAULT_OG_IMAGE = "/hero/pajak.jpg";
 
 export function absoluteUrl(path = ""): string {
   return new URL(path, siteConfig.url).toString();
