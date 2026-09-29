@@ -51,6 +51,19 @@ export const quoteSources = [
   { value: "inne", label: "Inne" },
 ] as const;
 
+export type QuoteSourceValue = (typeof quoteSources)[number]["value"];
+
+/** Etykieta źródła do maila: puste lub Facebook → strona internetowa */
+export function resolveReferralSourceLabel(source?: QuoteSourceValue | "" | null): string {
+  const websiteLabel = "Strona internetowa";
+
+  if (!source || source === "facebook") {
+    return websiteLabel;
+  }
+
+  return quoteSources.find((item) => item.value === source)?.label ?? websiteLabel;
+}
+
 export const featuredSlugs = ["pajak", "x", "rama_prostokat", "y"] as const;
 
 /** Kolejność stołów metalowych w ofercie (warianty zaraz po bazowych modelach) */

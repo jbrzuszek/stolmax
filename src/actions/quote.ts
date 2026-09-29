@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { quoteSources } from "@/data/site";
+import { quoteSources, resolveReferralSourceLabel } from "@/data/site";
 import { escapeHtml, sendSiteEmail, type ActionResult } from "@/lib/email";
 import { getProduct } from "@/lib/products";
 
@@ -42,8 +42,7 @@ export async function sendQuoteRequest(input: QuoteFormInput): Promise<ActionRes
     return { success: false, error: "Wybrany model stołu nie istnieje." };
   }
 
-  const sourceLabel =
-    quoteSources.find((source) => source.value === data.source)?.label ?? "Nie podano";
+  const sourceLabel = resolveReferralSourceLabel(data.source);
 
   const size = data.size?.trim() || "Nie podano";
   const extendable =

@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { quoteSources } from "@/data/site";
+import { quoteSources, resolveReferralSourceLabel } from "@/data/site";
 import { escapeHtml, sendSiteEmail, type ActionResult } from "@/lib/email";
 
 const sourceValues = quoteSources.map((source) => source.value) as [
@@ -31,8 +31,7 @@ export async function sendContactMessage(input: ContactFormInput): Promise<Actio
 
   const { name, email, phone, message, source } = parsed.data;
   const phoneValue = phone?.trim() || "Nie podano";
-  const sourceLabel =
-    quoteSources.find((item) => item.value === source)?.label ?? "Nie podano";
+  const sourceLabel = resolveReferralSourceLabel(source);
 
   return sendSiteEmail({
     subject: `[Stolmax] Wiadomość od ${name}`,

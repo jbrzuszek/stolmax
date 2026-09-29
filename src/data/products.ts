@@ -98,9 +98,9 @@ export const productMeta: Record<string, ProductMeta> = {
     specs: ["Blat w kształcie beczki", "Blat: laminat lub fornir dębowy", "Krawędź: 54 mm"],
   },
   kaczka: {
-    title: "Koło z nogami typu kaczka",
+    title: "Prostokąt z nogami typu Kaczka",
     description:
-      "Stół okrągły z nogami typu kaczka rozkładany na metalowych prowadnicach, którego blaty są wykonane z płyty laminowanej lub forniru dębowego, pogrubienie krawędzi stołu 36 mm.",
+      "Stół prostokątny z nogami typu kaczka rozkładany na metalowych prowadnicach, którego blaty są wykonane z płyty laminowanej lub forniru dębowego, pogrubienie krawędzi stołu 36 mm.",
     specs: ["Nogi typu kaczka", "Blat: laminat lub fornir dębowy", "Krawędź: 36 mm"],
   },
   pajak: {
