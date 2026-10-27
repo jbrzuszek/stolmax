@@ -4,10 +4,10 @@ import Image from "next/image";
 import { useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
 import { sendQuoteRequest } from "@/actions/quote";
-import { quoteSources } from "@/data/site";
+import { quoteSourceBlankValue, quoteSources } from "@/data/site";
 import { IMAGE_FOCUS_CLASS, type ImageFocus } from "@/types/product";
 
-type QuoteSource = (typeof quoteSources)[number]["value"];
+type QuoteSource = (typeof quoteSources)[number]["value"] | typeof quoteSourceBlankValue;
 
 export interface QuoteProductOption {
   slug: string;
@@ -359,6 +359,7 @@ export function QuoteForm({ products, initialSlug = "" }: QuoteFormProps) {
                 {source.label}
               </option>
             ))}
+            <option value={quoteSourceBlankValue}></option>
           </select>
         </div>
       </div>

@@ -1,13 +1,20 @@
 "use server";
 
 import { z } from "zod";
-import { quoteSources, resolveReferralSourceLabel } from "@/data/site";
+import {
+  quoteSourceBlankValue,
+  quoteSources,
+  resolveReferralSourceLabel,
+} from "@/data/site";
 import { escapeHtml, sendSiteEmail, type ActionResult } from "@/lib/email";
 import { getProduct } from "@/lib/products";
 
-const sourceValues = quoteSources.map((source) => source.value) as [
-  (typeof quoteSources)[number]["value"],
-  ...(typeof quoteSources)[number]["value"][],
+const sourceValues = [
+  ...quoteSources.map((source) => source.value),
+  quoteSourceBlankValue,
+] as [
+  (typeof quoteSources)[number]["value"] | typeof quoteSourceBlankValue,
+  ...((typeof quoteSources)[number]["value"] | typeof quoteSourceBlankValue)[],
 ];
 
 const quoteSchema = z.object({

@@ -51,17 +51,28 @@ export const quoteSources = [
   { value: "inne", label: "Inne" },
 ] as const;
 
-export type QuoteSourceValue = (typeof quoteSources)[number]["value"];
+/** Puste pole w formularzu wyceny – w mailu mapowane na Facebook */
+export const quoteSourceBlankValue = "fb_blank" as const;
 
-/** Etykieta źródła do maila: puste lub Facebook → strona internetowa */
+export type QuoteSourceValue =
+  | (typeof quoteSources)[number]["value"]
+  | typeof quoteSourceBlankValue;
+
+/** Etykieta źródła do maila */
 export function resolveReferralSourceLabel(source?: QuoteSourceValue | "" | null): string {
-  const websiteLabel = "Strona internetowa";
-
-  if (!source || source === "facebook") {
-    return websiteLabel;
+  if (source === quoteSourceBlankValue) {
+    return "Facebook";
   }
 
-  return quoteSources.find((item) => item.value === source)?.label ?? websiteLabel;
+  if (source === "facebook") {
+    return "Strona Internetowa";
+  }
+
+  if (!source) {
+    return "Strona internetowa";
+  }
+
+  return quoteSources.find((item) => item.value === source)?.label ?? "Strona internetowa";
 }
 
 export const featuredSlugs = ["pajak", "x", "rama_prostokat", "y"] as const;
